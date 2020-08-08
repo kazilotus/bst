@@ -1,0 +1,32 @@
+version: '3.3'
+
+configs:
+  proxy:
+    file: ./haproxy.cfg
+
+services:
+  haproxy:
+    image: haproxy:1.8-alpine
+    ports:
+      - "80:8000"
+      - "81:8181"
+    deploy:
+      mode: global
+    restart: always
+    configs: 
+    - source: proxy
+      target: /usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      - cluster1
+  
+  myservice:
+    image: tutum/hello-world
+    deploy:
+      replicas: 3
+      endpoint_mode: dnsrr
+    networks:
+      - cluster1
+
+networks:
+  cluster1:
+    driver: overlay
